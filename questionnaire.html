@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>שאלון תכנון השקעות ראשוני</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --card: #111827;
+    --card-border: #1e293b;
+    --accent: #22d3ee;
+    --accent-glow: rgba(34, 211, 238, 0.15);
+    --accent-dim: #0e7490;
+    --gold: #fbbf24;
+    --green: #34d399;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-muted: #64748b;
+    --yes: #34d399;
+    --no: #f87171;
+    --approx: #fbbf24;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Animated gradient background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(34, 211, 238, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(251, 191, 36, 0.03) 0%, transparent 50%);
+    animation: drift 20s ease-in-out infinite;
+    z-index: -1;
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-3%, 3%); }
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 40px 0 32px;
+    position: relative;
+  }
+
+  .header-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+    box-shadow: 0 8px 32px rgba(34, 211, 238, 0.25);
+  }
+
+  .header h1 {
+    font-family: 'Rubik', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    color: var(--text-dim);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* Progress */
+  .progress-wrapper {
+    margin: 0 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    padding: 16px 0 12px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--card-border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+  /* Question Card */
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-bottom: 16px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.5s ease forwards;
+    transition: border-color 0.3s;
+  }
+
+  .question-card.answered {
+    border-color: var(--accent-dim);
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-card:nth-child(1) { animation-delay: 0.1s; }
+  .question-card:nth-child(2) { animation-delay: 0.15s; }
+  .question-card:nth-child(3) { animation-delay: 0.2s; }
+  .question-card:nth-child(4) { animation-delay: 0.25s; }
+  .question-card:nth-child(5) { animation-delay: 0.3s; }
+  .question-card:nth-child(6) { animation-delay: 0.35s; }
+
+  .q-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    font-family: 'Rubik', sans-serif;
+  }
+
+  .q-text {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  /* Answer Buttons */
+  .answer-btns {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  .answer-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1.5px solid var(--card-border);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Heebo', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    outline: none;
+  }
+
+  .answer-btn:hover {
+    border-color: var(--text-muted);
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .answer-btn.selected-yes {
+    border-color: var(--yes);
+    background: rgba(52, 211, 153, 0.1);
+    color: var(--yes);
+  }
+
+  .answer-btn.selected-no {
+    border-color: var(--no);
+    background: rgba(248, 113, 113, 0.1);
+    color: var(--no);
+  }
+
+  .answer-btn.selected-approx {
+    border-color: var(--approx);
+    background: rgba(251, 191, 36, 0.1);
+    color: var(--approx);
+  }
+
+  /* Response Panel */
+  .response-panel {
+    margin-top: 16px;
+    padding: 20px;
+    border-radius: 12px;
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    display: none;
+    animation: fadeUp 0.4s ease forwards;
+  }
+
+  .response-panel.visible {
+    display: block;
+  }
+
+  .response-panel.type-yes {
+    background: rgba(52, 211, 153, 0.06);
+    border: 1px solid rgba(52, 211, 153, 0.15);
+  }
+
+  .response-panel.type-no {
+    background: rgba(248, 113, 113, 0.06);
+    border: 1px solid rgba(248, 113, 113, 0.15);
+  }
+
+  .response-panel.type-approx {
+    background: rgba(251, 191, 36, 0.06);
+    border: 1px solid rgba(251, 191, 36, 0.15);
+  }
+
+  .response-panel strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .response-panel .tip {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    font-size: 13.5px;
+  }
+
+  .response-panel .tip-icon {
+    flex-shrink: 0;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+
+  .response-panel a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--accent-dim);
+  }
+
+  /* Rule of 72 special section */
+  .rule72-box {
+    margin-top: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(251, 191, 36, 0.06));
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    border-radius: 12px;
+  }
+
+  .rule72-box h3 {
+    font-family: 'Rubik', sans-serif;
+    color: var(--accent);
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .rule72-formula {
+    text-align: center;
+    padding: 16px;
+    margin: 12px 0;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    font-family: 'Rubik', sans-serif;
+    font-size: 20px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  .rule72-examples {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .rule72-example {
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .rule72-example .rate { color: var(--accent); font-weight: 600; }
+  .rule72-example .years { color: var(--gold); font-weight: 600; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 0 20px;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .footer .disclaimer {
+    max-width: 480px;
+    margin: 0 auto 16px;
+    padding: 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .container { padding: 16px 14px 40px; }
+    .header h1 { font-size: 23px; }
+    .question-card { padding: 22px 18px; }
+    .answer-btns { gap: 8px; }
+    .answer-btn { padding: 10px 12px; font-size: 14px; }
+    .rule72-examples { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-icon">📊</div>
+    <h1>שאלון תכנון השקעות ראשוני</h1>
+    <p>השאלון הזה יעזור לך למפות את המצב הפיננסי שלך ולהבין מאיפה להתחיל. ענה בכנות — אין תשובות נכונות או לא נכונות.</p>
+  </div>
+
+  <div class="progress-wrapper">
+    <div class="progress-info">
+      <span id="progress-label">שאלה 0 מתוך 6</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div id="questions-container">
+
+    <!-- Q1: הון פנוי -->
+    <div class="question-card" id="q1">
+      <div class="q-number">1</div>
+      <div class="q-text">האם אתה יודע כמה הון פנוי (כסף נזיל) יש לך היום?</div>
+      <div class="answer-btns">
+        <button class="answer-btn" onclick="answer(1,'yes')">כן ✓</button>
+        <button class="answer-btn" onclick="answer(1,'approx')">בערך ~</button>
+        <button class="answer-btn" onclick="answer(1,'no')">לא ✗</button>
+      </div>
+      <div class="response-panel type-yes" id="r1-yes">
+        <strong>מצוין!</strong> זה הבסיס לכל תכנון פיננסי. הצעד הבא הוא לוודא שיש לך <strong>כרית ביטחון</strong> של 3-6 חודשי הוצאות בצד, ורק מעבר לזה להתחיל לחשוב על השקעות.
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <span>האם יש לך קושי לשתף את המידע הזה לצורך קבלת עצה מקצועית? שיתוף מדויק יאפשר ייעוץ טוב יותר.</span>
+        </div>
+      </div>
+      <div class="response-panel type-approx" id="r1-approx">
+        <strong>"בערך" זה התחלה,</strong> אבל לתכנון רציני חשוב להגיע למספרים מדויקים. הנה מה שכדאי לעשות:
+        <br><br>
+        ✦ פתח אקסל או גיליון גוגל<br>
+        ✦ רשום את כל חשבונות העו"ש והחיסכון שלך<br>
+        ✦ הוסף מזומנים ופיקדונות<br>
+        ✦ הפחת חובות לטווח קצר (אשראי, הלוואות)<br>
+        <br>
+        <strong>הסכום שנשאר = ההון הפנוי שלך.</strong>
+        <div class="tip">
+          <span class="tip-icon">🔍</span>
+          <span>היכנס לאתר <a href="https://har-hakesef.info" target="_blank">הר הכסף</a> של משרד האוצר — תגלה כספים שאולי שכחת שיש לך.</span>
+        </div>
+      </div>
+      <div class="response-panel type-no" id="r1-no">
+        <strong>זה בסדר, ואתה לא לבד.</strong> רוב האנשים לא יודעים בדיוק כמה הון פנוי יש להם. אבל זה הצעד הראשון והכי חשוב.
+        <br><br>
+        <strong>מה לעשות עכשיו:</strong><br>
+        ✦ פתח את אפליקציית הבנק — בדוק יתרה בכל חשבון<br>
+        ✦ בדוק פיקדונות וחסכונות<br>
+        ✦ היכנס ל<a href="https://har-hakesef.info" target="_blank">הר הכסף</a> — תגלה קופות, פוליסות וכספים אבודים<br>
+        ✦ רשום הכל בטבלה אחת פשוטה<br>
+        <br>
+        <div class="tip">
+          <span class="tip-icon">📋</span>
+          <span>אני ממליץ להכין טבלת ריכוז הון — אפילו גיליון גוגל פשוט עם: שם חשבון, סוג, יתרה. זה ייקח 30 דקות וישנה לך את התמונה.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2: דירה -->
+    <div class="question-card" id="q2">
+      <div class="q-number">2</div>
+      <div class="q-text">האם יש לך דירה בבעלותך, או שאתה גר בשכירות?</div>
+      <div class="answer-btns">
+        <button class="answer-btn" onclick="answer(2,'yes')">בבעלותי</button>
+        <button class="answer-btn" onclick="answer(2,'approx')">בבעלות חלקית</button>
+        <button class="answer-btn" onclick="answer(2,'no')">שכירות</button>
+      </div>
+      <div class="response-panel type-yes" id="r2-yes">
+        <strong>נכס בבעלותך — זה נכס משמעותי.</strong> חשוב לדעת את שוויו המעודכן כי הוא חלק מהתמונה הפיננסית הכוללת שלך.
+        <br><br>
+        ✦ בדוק עסקאות אחרונות באזור שלך ב<a href="https://www.madlan.co.il" target="_blank">מדלן</a><br>
+        ✦ הפחת את יתרת המשכנתא (אם יש) כדי לקבל את <strong>ההון העצמי בנכס</strong>
+        <div class="tip">
+          <span class="tip-icon">🏠</span>
+          <span>שווי הדירה מינוס יתרת המשכנתא = ההון העצמי שלך בנדל"ן. זה בדרך כלל הנכס הגדול ביותר של רוב המשפחות.</span>
+        </div>
+      </div>
+      <div class="response-panel type-approx" id="r2-approx">
+        <strong>בעלות חלקית</strong> — למשל עם בן/בת זוג, או נכס שעדיין במשכנתא גדולה. חשוב להבין מה <strong>החלק שלך</strong> בנכס.
+        <br><br>
+        ✦ בדוק את שווי השוק של הנכס<br>
+        ✦ הפחת את יתרת המשכנתא<br>
+        ✦ חשב את החלק היחסי שלך
+        <div class="tip">
+          <span class="tip-icon">📐</span>
+          <span>דוגמה: דירה שווה 2M ₪, משכנתא 800K, בעלות 50/50 → ההון שלך = 600K ₪</span>
+        </div>
+      </div>
+      <div class="response-panel type-no" id="r2-no">
+        <strong>שכירות זה לגיטימי לחלוטין.</strong> היתרון — יש לך גמישות ואין לך חוב משכנתא. החיסרון — אתה לא בונה הון דרך נדל"ן.
+        <br><br>
+        מה שחשוב לדעת: הכסף שאתה <strong>לא</strong> משלם על משכנתא, ארנונה גבוהה ותחזוקה — אפשר להשקיע אותו ולבנות הון בדרך אחרת.
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <span>אם השכירות שלך נמוכה משמעותית ממה שהיית משלם על משכנתא — ההפרש הוא "ההזדמנות" שלך להשקיע.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3: משכנתא -->
+    <div class="question-card" id="q3">
+      <div class="q-number">3</div>
+      <div class="q-text">האם אתה יודע כמה נותר לך לשלם מהמשכנתא?</div>
+      <div class="answer-btns">
+        <button class="answer-btn" onclick="answer(3,'yes')">כן</button>
+        <button class="answer-btn" onclick="answer(3,'approx')">בערך</button>
+        <button class="answer-btn" onclick="answer(3,'no')">לא / אין לי</button>
+      </div>
+      <div class="response-panel type-yes" id="r3-yes">
+        <strong>מעולה.</strong> זה מספר קריטי. משכנתא היא בדרך כלל ההתחייבות הכי גדולה שיש לאדם.
+        <br><br>
+        ✦ האם בדקת לאחרונה אם כדאי <strong>למחזר</strong> את המשכנתא?<br>
+        ✦ בסביבה של ריביות משתנות — שווה לבדוק אם אפשר לחסוך אלפי שקלים בשנה
+        <div class="tip">
+          <span class="tip-icon">🎯</span>
+          <span>טיפ: לפני שמשקיעים — לפעמים ההשקעה הכי טובה היא לסגור חלק מהמשכנתא, במיוחד אם הריבית גבוהה מ-4%.</span>
+        </div>
+      </div>
+      <div class="response-panel type-approx" id="r3-approx">
+        <strong>כדאי לדייק.</strong> ההבדל בין "בערך" לבין המספר האמיתי יכול להיות עשרות אלפי שקלים.
+        <br><br>
+        <strong>איך לבדוק:</strong><br>
+        ✦ היכנס לאתר או אפליקציית הבנק → משכנתאות<br>
+        ✦ חפש "יתרה לסילוק"<br>
+        ✦ רשום: יתרה, ריבית ממוצעת, תאריך סיום
+        <div class="tip">
+          <span class="tip-icon">📞</span>
+          <span>אם לא מצאת באפליקציה — התקשר למחלקת משכנתאות בבנק. הם חייבים לתת לך את המידע.</span>
+        </div>
+      </div>
+      <div class="response-panel type-no" id="r3-no">
+        <strong>אם אין לך משכנתא — מצוין,</strong> זו התחייבות פחות על הכתפיים. אם יש ואתה לא יודע את היתרה:
+        <br><br>
+        ✦ היכנס לאפליקציית הבנק → חפש "משכנתא"<br>
+        ✦ חפש את "לוח סילוקין" — שם תראה כמה נשאר<br>
+        ✦ שים לב לריבית — אם היא מעל 4-5%, שווה לבדוק מיחזור
+        <div class="tip">
+          <span class="tip-icon">📱</span>
+          <span>רוב הבנקים מציגים את זה באפליקציה. אם לא — סניף או טלפון, תבקש "יתרה לסילוק מלא".</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4: קופות גמל ופנסיה -->
+    <div class="question-card" id="q4">
+      <div class="q-number">4</div>
+      <div class="q-text">האם אתה מודע לכמה כסף יש לך בקופות גמל, קרנות השתלמות וקרן הפנסיה?</div>
+      <div class="answer-btns">
+        <button class="answer-btn" onclick="answer(4,'yes')">כן</button>
+        <button class="answer-btn" onclick="answer(4,'approx')">בערך</button>
+        <button class="answer-btn" onclick="answer(4,'no')">לא</button>
+      </div>
+      <div class="response-panel type-yes" id="r4-yes">
+        <strong>יפה מאוד!</strong> רוב האנשים מתעלמים מהכספים ה"רחוקים" האלה, אבל הם חלק מהותי מההון שלך.
+        <br><br>
+        ✦ האם בדקת את <strong>דמי הניהול</strong>? הפרש של 0.5% נשמע קטן, אבל על פני 20 שנה זה מאות אלפי שקלים<br>
+        ✦ האם המסלולים שלך מתאימים לגיל ולפרופיל הסיכון שלך?
+        <div class="tip">
+          <span class="tip-icon">⚡</span>
+          <span>טיפ: משא ומתן על דמי ניהול הוא אחת ההשקעות הכי טובות שתעשה. תתקשר ותבקש הנחה — זה עובד.</span>
+        </div>
+      </div>
+      <div class="response-panel type-approx" id="r4-approx">
+        <strong>"בערך" לא מספיק כאן.</strong> הכספים האלה יכולים להיות מאות אלפי ₪ ואפילו יותר — בלי שתרגיש.
+        <br><br>
+        <strong>איך לבדוק:</strong><br>
+        ✦ היכנס ל<a href="https://har-hakesef.info" target="_blank">הר הכסף</a> — תראה הכל במקום אחד<br>
+        ✦ רשום: שם הקופה, סוג, יתרה, דמי ניהול<br>
+        ✦ בדוק אם יש לך קופות "יתומות" ממקומות עבודה ישנים
+        <div class="tip">
+          <span class="tip-icon">🔍</span>
+          <span>הר הכסף חושף כספים שלא ידעת עליהם. יש אנשים שגילו עשרות ומאות אלפי שקלים שפשוט שכחו.</span>
+        </div>
+      </div>
+      <div class="response-panel type-no" id="r4-no">
+        <strong>זה אולי הדבר הכי דחוף לטפל בו.</strong> לרוב האנשים יש כסף משמעותי בקופות שהם אפילו לא יודעים עליהן.
+        <br><br>
+        <strong>צעד ראשון — עכשיו:</strong><br>
+        ✦ היכנס ל<a href="https://har-hakesef.info" target="_blank">הר הכסף</a> עם תעודת זהות<br>
+        ✦ תראה את כל הקופות, הפנסיות והביטוחים שלך<br>
+        ✦ רשום את הנתונים בטבלה
+        <br><br>
+        <strong>שלב שני:</strong><br>
+        ✦ בדוק דמי ניהול — אם הם מעל 0.5% צבירה, תנהל מו"מ להורדה<br>
+        ✦ אחד קופות ישנות — קופה אחת גדולה עדיפה על 5 קטנות
+        <div class="tip">
+          <span class="tip-icon">💰</span>
+          <span>הר הכסף: <a href="https://har-hakesef.info" target="_blank">har-hakesef.info</a> — זה חינמי, רשמי, ולוקח 5 דקות.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q5: חיסכון חודשי -->
+    <div class="question-card" id="q5">
+      <div class="q-number">5</div>
+      <div class="q-text">האם יש לך יכולת לחסוך סכום מסוים מדי חודש?</div>
+      <div class="answer-btns">
+        <button class="answer-btn" onclick="answer(5,'yes')">כן</button>
+        <button class="answer-btn" onclick="answer(5,'approx')">לפעמים</button>
+        <button class="answer-btn" onclick="answer(5,'no')">לא</button>
+      </div>
+      <div class="response-panel type-yes" id="r5-yes">
+        <strong>זה הכוח הכי גדול שיש לך.</strong> חיסכון קבוע + זמן + ריבית דריבית = עושר.
+        <br><br>
+        הכלל: <strong>שלם לעצמך קודם.</strong> ביום שמקבלים משכורת — העבר אוטומטית סכום קבוע לחיסכון/השקעה, לפני שאתה מוציא על משהו אחר.
+        <div class="tip">
+          <span class="tip-icon">🚀</span>
+          <span>אפילו 1,000 ₪ בחודש, בתשואה של 8% שנתי, הופכים ל-590,000 ₪ תוך 20 שנה. אל תזלזל בכוח של עקביות.</span>
+        </div>
+      </div>
+      <div class="response-panel type-approx" id="r5-approx">
+        <strong>"לפעמים" זה יותר טוב מ"אף פעם".</strong> השאלה היא איך להפוך את זה לעקבי.
+        <br><br>
+        ✦ תבדוק: מה ההוצאות הקבועות שלך? (שכירות/משכנתא, ביטוחים, מזון, חינוך)<br>
+        ✦ מה נשאר? אפילו סכום קטן קבוע עדיף על סכום גדול לא עקבי<br>
+        ✦ הגדר <strong>הוראת קבע אוטומטית</strong> ביום המשכורת
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <span>הטריק: תגדיר סכום קטן שלא כואב (500-1000 ₪) כהוראת קבע. אחרי 3 חודשים תתרגל ותוכל להעלות.</span>
+        </div>
+      </div>
+      <div class="response-panel type-no" id="r5-no">
+        <strong>זה מצב שחייבים לשנות,</strong> כי בלי חיסכון — אין השקעות, ובלי השקעות — אין בניית עושר.
+        <br><br>
+        <strong>הצעד הראשון:</strong> לפני שחושבים על השקעות — צריך להבין לאן הכסף הולך.
+        <br><br>
+        ✦ עקוב אחרי ההוצאות שלך חודש אחד<br>
+        ✦ סווג: הכרחי / נחמד / מיותר<br>
+        ✦ חתוך 10-20% מה"מיותר" והפנה לחיסכון
+        <div class="tip">
+          <span class="tip-icon">✂️</span>
+          <span>רוב האנשים מגלים שהם מוציאים 15-25% על דברים שהם לא באמת צריכים. תתחיל לעקוב — תראה את זה בעצמך.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q6: נוסחת 72 -->
+    <div class="question-card" id="q6">
+      <div class="q-number">6</div>
+      <div class="q-text">האם אתה מכיר את "כלל 72" — הנוסחה לחישוב הכפלת הון?</div>
+      <div class="answer-btns">
+        <button class="answer-btn" onclick="answer(6,'yes')">כן, מכיר</button>
+        <button class="answer-btn" onclick="answer(6,'approx')">שמעתי על זה</button>
+        <button class="answer-btn" onclick="answer(6,'no')">לא</button>
+      </div>
+      <div class="response-panel type-yes" id="r6-yes">
+        <strong>מצוין שאתה מכיר!</strong> זה אחד הכלים הכי חזקים לחשיבה על השקעות לטווח ארוך. 
+        <br><br>
+        עכשיו תשתמש בזה: קח את ההון הפנוי שלך, ותשאל את עצמך — <strong>עם 8% תשואה, תוך כמה שנים הוא יוכפל?</strong> (תשובה: 9 שנים). כשאתה רואה את המספרים ככה, ההשקעה הופכת למוחשית.
+      </div>
+      <div class="response-panel type-approx" id="r6-approx">
+        <strong>אז בוא נחדד את זה, כי זה כלי שישנה לך את החשיבה:</strong>
+        <div class="rule72-box">
+          <h3>כלל 72 — הנוסחה הכי פשוטה בעולם ההשקעות</h3>
+          <div class="rule72-formula">72 ÷ אחוז תשואה שנתי = שנים להכפלה</div>
+          <p style="color: var(--text-dim); font-size: 14px;">
+            כלומר: אם את/ה מרוויח/ה X אחוז בשנה, חלק 72 ב-X ותדע תוך כמה שנים הכסף שלך יוכפל.
+          </p>
+          <div class="rule72-examples">
+            <div class="rule72-example"><span class="rate">6%</span> → הכפלה כל <span class="years">12 שנה</span></div>
+            <div class="rule72-example"><span class="rate">8%</span> → הכפלה כל <span class="years">9 שנים</span></div>
+            <div class="rule72-example"><span class="rate">10%</span> → הכפלה כל <span class="years">7.2 שנים</span></div>
+            <div class="rule72-example"><span class="rate">12%</span> → הכפלה כל <span class="years">6 שנים</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="response-panel type-no" id="r6-no">
+        <strong>אז זה משהו שאתה חייב להכיר — ותאהב את זה:</strong>
+        <div class="rule72-box">
+          <h3>כלל 72 — הנוסחה הכי פשוטה בעולם ההשקעות</h3>
+          <div class="rule72-formula">72 ÷ אחוז תשואה שנתי = שנים להכפלה</div>
+          <p style="color: var(--text-dim); font-size: 14px;">
+            הנוסחה אומרת: קח את המספר 72 וחלק אותו באחוז התשואה השנתית שלך. התוצאה = כמה שנים ייקח עד שהכסף שלך יוכפל.
+          </p>
+          <div class="rule72-examples">
+            <div class="rule72-example"><span class="rate">6%</span> → הכפלה כל <span class="years">12 שנה</span></div>
+            <div class="rule72-example"><span class="rate">8%</span> → הכפלה כל <span class="years">9 שנים</span></div>
+            <div class="rule72-example"><span class="rate">10%</span> → הכפלה כל <span class="years">7.2 שנים</span></div>
+            <div class="rule72-example"><span class="rate">12%</span> → הכפלה כל <span class="years">6 שנים</span></div>
+          </div>
+          <br>
+          <p style="color: var(--text); font-size: 14.5px; line-height: 1.8;">
+            <strong>דוגמה מעשית:</strong> יש לך 200,000 ₪ ואתה משקיע ב-8% שנתי.
+            <br>✦ אחרי 9 שנים → 400,000 ₪
+            <br>✦ אחרי 18 שנה → 800,000 ₪
+            <br>✦ אחרי 27 שנה → 1,600,000 ₪
+            <br><br>
+            <strong>זו ריבית דריבית.</strong> הכסף עובד בשבילך, גם כשאתה ישן. ככל שמתחילים מוקדם יותר — ההשפעה דרמטית יותר.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="disclaimer">
+      ⚠️ שאלון זה הוא כלי עזר ראשוני בלבד ואינו מהווה ייעוץ השקעות, ייעוץ מס, או ייעוץ פיננסי מכל סוג. לפני קבלת החלטות פיננסיות — התייעץ עם בעל מקצוע מורשה.
+    </div>
+    שאלון תכנון השקעות ראשוני © 2026
+  </div>
+
+</div>
+
+<script>
+  const state = {};
+  let answered = 0;
+  const total = 6;
+
+  function answer(q, val) {
+    state[q] = val;
+
+    // Update button styles
+    const card = document.getElementById('q' + q);
+    card.classList.add('answered');
+    const btns = card.querySelectorAll('.answer-btn');
+    btns.forEach(btn => {
+      btn.classList.remove('selected-yes', 'selected-no', 'selected-approx');
+    });
+
+    const idx = val === 'yes' ? 0 : val === 'approx' ? 1 : 2;
+    btns[idx].classList.add('selected-' + val);
+
+    // Hide all response panels for this question
+    ['yes', 'approx', 'no'].forEach(t => {
+      const panel = document.getElementById('r' + q + '-' + t);
+      if (panel) {
+        panel.classList.remove('visible');
+      }
+    });
+
+    // Show the correct response
+    const target = document.getElementById('r' + q + '-' + val);
+    if (target) {
+      target.classList.add('visible');
+    }
+
+    // Count unique answered questions
+    answered = Object.keys(state).length;
+    updateProgress();
+
+    // Smooth scroll to show response
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  }
+
+  function updateProgress() {
+    const pct = Math.round((answered / total) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = 'שאלה ' + answered + ' מתוך ' + total;
+    document.getElementById('progress-pct').textContent = pct + '%';
+  }
+</script>
+
+</body>
+</html>
